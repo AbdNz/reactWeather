@@ -7,87 +7,9 @@
  */
 
 import React, {Component} from 'react';
-import styles from "./Styles";
-import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Modal, TouchableHighlight, Image} from 'react-native';
-// import { StackNavigator } from "react-navigation";
-
-// class MainActivity extends Component {
-
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       TextInputName: "",
-//       TextInputNumber: ""
-//     }
-//   }
-
-//   static navigationOptions = {
-//     title: "MainActivity"
-//   };
-
-//   sundDataFunction = () => {
-//     this.props.navigation.navigate("Second", {
-//       NameObj: this.state.TextInputName,
-//       NumberObj: this.state.TextInputNumber
-//     })
-//   }
-
-//   render() {
-//     return (
-//       <SafeAreaView style={{flex: 1}}>
-//         <View style={style.container}>
-//           <TextInput
-//             placeholder="Enter Name here"
-//             onChangeText={data => this.setState({ TextInputName: data })}
-//             style={styles.textInputStyle}
-//             underlineColorAndroid='transparent'
-//           />
-  
-//           <TextInput
-//             placeholder="Enter Mobile Number here"
-//             onChangeText={data => this.setState({ TextInputNumber: data })}
-//             style={styles.textInputStyle}
-//             keyboardType={'numeric'}
-//             underlineColorAndroid='transparent'
-//           />
-  
-//           <TouchableOpacity onPress={this.Send_Data_Function} activeOpacity={0.7} style={styles.button} >
-  
-//             <Text style={styles.buttonText}> Send TextInput Value To Next Activity </Text>
-  
-//           </TouchableOpacity>
-//         </View>
-//       </SafeAreaView>
-//     )
-//   }
-// }
-
-
-// class SecondActivity extends Component {
-//   static navigationOptions = {
-//     title: "SecondActivity"
-//   };
-
-//   render() {
-//     return(
-//       <SafeAreaView style={{flex: 1}}>
-//         <View style={styles.container}>
-//           <Text>{this.props.navigation.state.params.NameObj}</Text>
-//           <Text>{this.props.navigation.state.params.NumberObj}</Text>
-//         </View>
-//       </SafeAreaView>
-//     )
-//   }
-// }
-
-
-// export default Project = StackNavigator(
-//   {
-//     First: { screen: MainActivity},
-//     Second: { screen: SecondActivity}
-//   }
-// )
-
+import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Image} from 'react-native';
+import ForecastCard from './components/ForecastCard'
+import DetailsCard from './components/DetailsCard'
 
 export async function requestRuntimePermission() {
   try {
@@ -128,7 +50,8 @@ export default class App extends Component{
     this.getLongLat = navigator.geolocation.watchPosition(
       (position) => {
         if ((this.state.latitude !== position.coords.latitude) && (this.state.longitude !== position.coords.longitude)) {
-          this.requestWeatheData(position);
+          // this.getWeatherFromApiAsync(position);
+
           this.setState({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -145,30 +68,25 @@ export default class App extends Component{
     navigator.geolocation.clearWatch(this.getLongLat);
   }
 
-  async requestWeatheData(position) {
+  async getWeatherFromApiAsync(position) {
+
     var apiKey = "52a3a122fb5328e9cbbed672e53f4be5";
     var latitude = position.coords.latitude;
     var longitude = position.coords.longitude;
     var city = "Delhi";
-    var receivedData = "";
-    var reqUrlLongLat = "https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&units=metric&APPID="+apiKey;
+    var reqUrlLatLon = "https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&units=metric&APPID="+apiKey;
     var reqUrlCity = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+apiKey;
 
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = (e) => {
-      if (request.readyState !== 4) {
-        return;
-      }
-      if (request.status === 200) {
-        receivedData = JSON.parse(request.responseText);
-        this.setStateData(receivedData);
-        console.log("Latitude: "+receivedData.coord.lat+"\nLongitude: "+receivedData.coord.lon);
-      } else {
-        console.warn("error");
-      }
-    }
-    request.open('GET', reqUrlLongLat);
-    request.send();
+    return fetch(reqUrlLatLon)
+      .then((response) => response.json())
+      .then((responseJson) => {
+        console.log(responseJson);
+        this.setStateData(responseJson);
+        return responseJson;
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 
   setModalVisible(visible) {
@@ -182,8 +100,6 @@ export default class App extends Component{
     console.log("Minutes: "+d.getMinutes());
     console.log("Seconds: "+d.getSeconds());
         
-    
-
     this.setState({
       temp: data.main.temp,
       tempMax: data.main.temp_max,
@@ -202,66 +118,36 @@ export default class App extends Component{
 
   render() {
     return (
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1, backgroundColor: 'lightblue'}}>
+      <Text style={{textAlign: 'center', fontWeight:'bold', fontSize: 24}}>Mumbai</Text>
         <View style={styles.container}>
-          <View style={{flex: 1, alignContent: 'center'}}>
-            <Image style={{width: 75, height: 75}} source={{uri: "http://openweathermap.org/img/w/"+this.state.icon+".png", cache: "force-cache"}} />
-            <View style={{flex: 1, flexDirection: "column", marginStart: 16}}>
-              <Text style={{fontSize: 32}}>{this.state.temp}°C</Text>
-              <View style={{flex: 1, flexDirection: 'row', marginTop: 8}}>
-                <Text style={{flex: 1, textAlign: 'left'}}>{this.state.tempMin}°C</Text>
-                <Text style={{flex: 1, textAlign: 'right'}}>{this.state.tempMax}°C</Text>
-              </View>
-            </View>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={{fontSize: 84, }}>23</Text>
+            <Text style={{fontSize: 32, top: 12}}>°C</Text>
           </View>
-
-          <View style={{flex: 1, flexDirection: 'row'}}>
-            <View style={{flex: 1}}>
-              <Text>Visibility</Text>
-              <Text>Pressure</Text>
-              <Text>Humidity</Text>
-              <Text>Wind</Text>
-              <Text>Sunrise</Text>
-              <Text>Sunset</Text>
-            </View>
-            <View style={{flex: 3}}>
-              <Text>{this.state.visibility} mtrs</Text>
-              <Text>{this.state.pressure} hPa</Text>
-              <Text>{this.state.humidity} %</Text>
-              <Text>{this.state.windSpeed} kmps  {this.state.windDegree}°</Text>
-              <Text>{Math.round(this.state.sunrise)}</Text>
-              <Text>{this.state.sunset}</Text>
-            </View>
-          </View>
+          <Text style={{fontSize: 20, top: -8}}>Clear</Text>
 
         </View>
+
+        <View style={{flexDirection: 'row', justifyContent: 'flex-end', marginEnd: 16}}>
+          <Text>More Details</Text>
+          <Image style={{width: 16, height: 16}} source={require('./icons/chevron.png')} />
+        </View>
+
+        <ForecastCard />
+        <DetailsCard />
+
       </SafeAreaView>
     );
   }
 }
 
-
-
-
-{/* <Modal
-animationType="slide"
-transparent={false}
-visible={this.state.modalVisible}
-// presentationStyle="fullScreen"
-onRequestClose={() => {
-  Alert.alert('Modal has been closed.');
-}}>
-  <SafeAreaView style={{flex: 1}}>
-    <View style={styles.container}>
-      <Text>Hello World!</Text>
-      <TouchableHighlight onPress={() => { this.setModalVisible(!this.state.modalVisible) }}>
-        <Text>Hide Modal</Text>
-      </TouchableHighlight>
-    </View>
-  </SafeAreaView>
-</Modal>
-
-<TouchableHighlight onPress={() => { this.setModalVisible(true) }}>
-  <Text>Show Modal</Text>
-</TouchableHighlight> */}
-          
+const styles = StyleSheet.create({
+  container: {
+      flex: 1,
+      flexDirection: "column",
+      padding: 8,
+      margin: 8,
+      // borderWidth: 0.5
+    }
+})
