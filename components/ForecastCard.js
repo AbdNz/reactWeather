@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Image} from 'react-native';
+import PropTypes from 'prop-types';
 import Divider from './Divider';
 
 
@@ -39,6 +40,10 @@ export default class ForecastCard extends Component {
             </View>
         )
     }
+}
+
+ForecastCard.propTypes = {
+    forecastData: PropTypes.object
 }
 
 

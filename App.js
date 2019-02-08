@@ -38,8 +38,8 @@ export default class App extends Component{
   constructor(props) {
     super(props);
     this.state = { latitude: 0, longitude: 0, error: null }
-    this.state = { modalVisible: false }
-    this.state = { temp: 0, tempMax: 0, tempMin: 0, pressure: 0, humidity: 0, description: null, icon: null, visibility: 0, windSpeed: 0, windDegree: 0, sunrise: null, sunset: null}
+    this.state = { weatherData: null }
+    this.state = { temp: 0, tempMax: 0, tempMin: 0, pressure: 0, humidity: 0, description: null, icon: null, visibility: 0, windSpeed: 0, windDegree: 0, sunrise: null, sunset: null, city: null}
   }
 
   async componentDidMount() {
@@ -50,7 +50,7 @@ export default class App extends Component{
     this.getLongLat = navigator.geolocation.watchPosition(
       (position) => {
         if ((this.state.latitude !== position.coords.latitude) && (this.state.longitude !== position.coords.longitude)) {
-          // this.getWeatherFromApiAsync(position);
+          this.getWeatherFromApiAsync(position);
 
           this.setState({
             latitude: position.coords.latitude,
@@ -80,7 +80,7 @@ export default class App extends Component{
     return fetch(reqUrlLatLon)
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log(responseJson);
+        console.log(reqUrlLatLon);
         this.setStateData(responseJson);
         return responseJson;
       })
@@ -101,31 +101,35 @@ export default class App extends Component{
     console.log("Seconds: "+d.getSeconds());
         
     this.setState({
-      temp: data.main.temp,
-      tempMax: data.main.temp_max,
-      tempMin: data.main.temp_min,
-      pressure: data.main.pressure,
-      humidity: data.main.humidity,
-      description: data.weather[0].description,
-      icon: data.weather[0].icon,
-      visibility: data.visibility,
-      windSpeed: data.wind.speed,
-      windDegree: data.wind.deg,
-      sunrise: data.sys.sunrise,
-      sunset: data.sys.sunset
+      temp: parseInt(data.main.temp),
+      // tempMax: data.main.temp_max,
+      // tempMin: data.main.temp_min,
+      // pressure: data.main.pressure,
+      // humidity: data.main.humidity,
+      description: data.weather[0].description.charAt(0).toUpperCase()+data.weather[0].description.slice(1),
+      // icon: data.weather[0].icon,
+      // visibility: data.visibility,
+      // windSpeed: data.wind.speed,
+      // windDegree: data.wind.deg,
+      // sunrise: data.sys.sunrise,
+      // sunset: data.sys.sunset,
+      city: data.name,
+
+      weatherData: data
+
     })
   }
 
   render() {
     return (
       <SafeAreaView style={{flex: 1, backgroundColor: 'lightblue'}}>
-      <Text style={{textAlign: 'center', fontWeight:'bold', fontSize: 24}}>Mumbai</Text>
+      <Text style={{textAlign: 'center', fontWeight:'bold', fontSize: 24}}>{this.state.city}</Text>
         <View style={styles.container}>
           <View style={{flexDirection: 'row'}}>
-            <Text style={{fontSize: 84, }}>23</Text>
+            <Text style={{fontSize: 84, }}>{this.state.temp}</Text>
             <Text style={{fontSize: 32, top: 12}}>°C</Text>
           </View>
-          <Text style={{fontSize: 20, top: -8}}>Clear</Text>
+          <Text style={{fontSize: 20, top: -8}}>{this.state.description}</Text>
 
         </View>
 
@@ -134,8 +138,8 @@ export default class App extends Component{
           <Image style={{width: 16, height: 16}} source={require('./icons/chevron.png')} />
         </View>
 
-        <ForecastCard />
-        <DetailsCard />
+        <ForecastCard forecastData={this.state.weatherForecastData}/>
+        <DetailsCard detailsData={this.state.weatherData}/>
 
       </SafeAreaView>
     );
@@ -148,6 +152,5 @@ const styles = StyleSheet.create({
       flexDirection: "column",
       padding: 8,
       margin: 8,
-      // borderWidth: 0.5
     }
 })
