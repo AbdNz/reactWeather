@@ -1371,7 +1371,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   _reactNative.AppRegistry.registerComponent(_app.name, function () {
     return _App.default;
   });
-},0,[1,2,543,553],"index.js");
+},0,[1,2,543,554],"index.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
@@ -86133,6 +86133,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
 
   var _DetailsCard = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[12], "./components/DetailsCard"));
 
+  var _Util = _$$_REQUIRE(_dependencyMap[13], "./utility/Util");
+
   var _jsxFileName = "/Users/affixus/workspace/reactNativeProj/reactWeather/App.js";
   var _components = {
     App: {
@@ -86209,17 +86211,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       };
       _this.state = {
         temp: 0,
-        tempMax: 0,
-        tempMin: 0,
-        pressure: 0,
-        humidity: 0,
         description: null,
-        icon: null,
-        visibility: 0,
-        windSpeed: 0,
-        windDegree: 0,
-        sunrise: null,
-        sunset: null,
         city: null
       };
       return _this;
@@ -86245,7 +86237,9 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
               case 3:
                 this.getLongLat = navigator.geolocation.watchPosition(function (position) {
                   if (_this2.state.latitude !== position.coords.latitude && _this2.state.longitude !== position.coords.longitude) {
-                    _this2.getWeatherFromApiAsync(position);
+                    (0, _Util.getForecastData)(_Util.ForecastType.current, position.coords.latitude, position.coords.longitude).then(function (data) {
+                      return _this2.setStateData(data);
+                    });
 
                     _this2.setState({
                       latitude: position.coords.latitude,
@@ -86277,54 +86271,12 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
         navigator.geolocation.clearWatch(this.getLongLat);
       }
     }, {
-      key: "getWeatherFromApiAsync",
-      value: function getWeatherFromApiAsync(position) {
-        var _this3 = this;
-
-        var apiKey, latitude, longitude, city, reqUrlLatLon, reqUrlCity;
-        return _regenerator.default.async(function getWeatherFromApiAsync$(_context3) {
-          while (1) {
-            switch (_context3.prev = _context3.next) {
-              case 0:
-                apiKey = "52a3a122fb5328e9cbbed672e53f4be5";
-                latitude = position.coords.latitude;
-                longitude = position.coords.longitude;
-                city = "Delhi";
-                reqUrlLatLon = "https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=metric&APPID=" + apiKey;
-                reqUrlCity = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=metric&appid=" + apiKey;
-                return _context3.abrupt("return", fetch(reqUrlLatLon).then(function (response) {
-                  return response.json();
-                }).then(function (responseJson) {
-                  console.log(reqUrlLatLon);
-
-                  _this3.setStateData(responseJson);
-
-                  return responseJson;
-                }).catch(function (error) {
-                  console.error(error);
-                }));
-
-              case 7:
-              case "end":
-                return _context3.stop();
-            }
-          }
-        }, null, this);
-      }
-    }, {
-      key: "setModalVisible",
-      value: function setModalVisible(visible) {
-        this.setState({
-          modalVisible: visible
-        });
-      }
-    }, {
       key: "setStateData",
       value: function setStateData(data) {
-        var d = new Date(data.sys.sunrise * 1000);
-        console.log("Hours: " + d.getHours());
-        console.log("Minutes: " + d.getMinutes());
-        console.log("Seconds: " + d.getSeconds());
+        if (data == undefined) {
+          return;
+        }
+
         this.setState({
           temp: parseInt(data.main.temp),
           description: data.weather[0].description.charAt(0).toUpperCase() + data.weather[0].description.slice(1),
@@ -86342,7 +86294,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 125
+            lineNumber: 91
           }
         }, _react.default.createElement(_reactNative.Text, {
           style: {
@@ -86352,13 +86304,13 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 126
+            lineNumber: 92
           }
         }, this.state.city), _react.default.createElement(_reactNative.View, {
           style: styles.container,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 127
+            lineNumber: 93
           }
         }, _react.default.createElement(_reactNative.View, {
           style: {
@@ -86366,7 +86318,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 128
+            lineNumber: 94
           }
         }, _react.default.createElement(_reactNative.Text, {
           style: {
@@ -86374,7 +86326,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 129
+            lineNumber: 95
           }
         }, this.state.temp), _react.default.createElement(_reactNative.Text, {
           style: {
@@ -86383,7 +86335,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 130
+            lineNumber: 96
           }
         }, "\xB0C")), _react.default.createElement(_reactNative.Text, {
           style: {
@@ -86392,7 +86344,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 132
+            lineNumber: 98
           }
         }, this.state.description)), _react.default.createElement(_reactNative.View, {
           style: {
@@ -86402,34 +86354,35 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 136
+            lineNumber: 102
           }
         }, _react.default.createElement(_reactNative.Text, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 137
+            lineNumber: 103
           }
         }, "More Details"), _react.default.createElement(_reactNative.Image, {
           style: {
             width: 16,
             height: 16
           },
-          source: _$$_REQUIRE(_dependencyMap[13], "./icons/chevron.png"),
+          source: _$$_REQUIRE(_dependencyMap[14], "./icons/chevron.png"),
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 138
+            lineNumber: 104
           }
         })), _react.default.createElement(_ForecastCard.default, {
-          forecastData: this.state.weatherForecastData,
+          latitude: this.state.latitude,
+          longitude: this.state.longitude,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 141
+            lineNumber: 107
           }
         }), _react.default.createElement(_DetailsCard.default, {
           detailsData: this.state.weatherData,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 142
+            lineNumber: 108
           }
         }));
       }
@@ -86448,7 +86401,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       margin: 8
     }
   });
-},543,[1,544,19,20,35,38,41,103,53,183,2,545,547,552],"App.js");
+},543,[1,544,19,20,35,38,41,103,53,183,2,545,548,547,553],"App.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   function _interopRequireWildcard(obj) {
     if (obj && obj.__esModule) {
@@ -86507,6 +86460,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
 
   var _Divider = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[11], "./Divider"));
 
+  var _Util = _$$_REQUIRE(_dependencyMap[12], "../utility/Util");
+
   var _jsxFileName = "/Users/affixus/workspace/reactNativeProj/reactWeather/components/ForecastCard.js";
   var _components = {
     ForecastCard: {
@@ -86530,174 +86485,138 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var ForecastCard = _wrapComponent("ForecastCard")(function (_Component) {
     (0, _inherits2.default)(ForecastCard, _Component);
 
-    function ForecastCard() {
+    function ForecastCard(props) {
+      var _this;
+
       (0, _classCallCheck2.default)(this, ForecastCard);
-      return (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ForecastCard).apply(this, arguments));
+      _this = (0, _possibleConstructorReturn2.default)(this, (0, _getPrototypeOf2.default)(ForecastCard).call(this, props));
+      _this.state = {
+        data: null,
+        isDataAvailable: false
+      };
+      return _this;
     }
 
     (0, _createClass2.default)(ForecastCard, [{
       key: "render",
       value: function render() {
+        var _this2 = this;
+
+        var latitude = this.props.latitude;
+        var longitude = this.props.longitude;
+
+        if (latitude != undefined && longitude != undefined && !this.state.isDataAvailable) {
+          (0, _Util.getForecastData)(_Util.ForecastType.forecast16, latitude, longitude).then(function (data) {
+            return _this2.setState({
+              data: data,
+              isDataAvailable: true
+            });
+          }).catch(function (error) {
+            _this2.setState({
+              isDataAvailable: true
+            });
+
+            console.error(error);
+          });
+        }
+
+        function setData(data) {
+          console.log(data);
+          var count = data.cnt;
+          var listItem = [];
+
+          for (i = 0; i < count; i++) {
+            listItem.push(_react.default.createElement(ForecastRow, {
+              __source: {
+                fileName: _jsxFileName,
+                lineNumber: 34
+              }
+            }));
+
+            if (i != count - 1) {
+              listItem.push(_react.default.createElement(_Divider.default, {
+                __source: {
+                  fileName: _jsxFileName,
+                  lineNumber: 36
+                }
+              }));
+            }
+          }
+
+          return listItem;
+        }
+
+        var Details = function Details() {
+          return _this2.state.data != null ? setData(_this2.state.data) : null;
+        };
+
+        var ForecastRow = function ForecastRow(props) {
+          return _react.default.createElement(_reactNative.View, {
+            style: {
+              flexDirection: 'row',
+              alignItems: "center"
+            },
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 50
+            }
+          }, _react.default.createElement(_reactNative.Text, {
+            style: styles.cardText,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 51
+            }
+          }, props.day), _react.default.createElement(_reactNative.View, {
+            style: {
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              flex: 1,
+              flexDirection: 'row'
+            },
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 52
+            }
+          }, _react.default.createElement(_reactNative.Image, {
+            style: {
+              width: 30,
+              height: 30,
+              marginEnd: 8
+            },
+            source: {
+              uri: "http://openweathermap.org/img/w/50d.png",
+              cache: "force-cache"
+            },
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 53
+            }
+          }), _react.default.createElement(_reactNative.Text, {
+            style: styles.cardText,
+            __source: {
+              fileName: _jsxFileName,
+              lineNumber: 54
+            }
+          }, "26 / 16\xB0C")));
+        };
+
         return _react.default.createElement(_reactNative.View, {
           style: styles.cardContainer,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 11
+            lineNumber: 61
           }
-        }, _react.default.createElement(_reactNative.View, {
-          style: {
-            flexDirection: 'row',
-            alignItems: "center"
-          },
+        }, _react.default.createElement(Details, {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 12
+            lineNumber: 67
           }
-        }, _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 13
-          }
-        }, "Today - Clear"), _react.default.createElement(_reactNative.View, {
-          style: {
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row'
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 14
-          }
-        }, _react.default.createElement(_reactNative.Image, {
-          style: {
-            width: 30,
-            height: 30,
-            marginEnd: 8
-          },
-          source: {
-            uri: "http://openweathermap.org/img/w/50d.png",
-            cache: "force-cache"
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 15
-          }
-        }), _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 16
-          }
-        }, "26 / 16\xB0C"))), _react.default.createElement(_Divider.default, {
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 19
-          }
-        }), _react.default.createElement(_reactNative.View, {
-          style: {
-            flexDirection: 'row',
-            alignItems: "center"
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 20
-          }
-        }, _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 21
-          }
-        }, "Tomorrow - Clear"), _react.default.createElement(_reactNative.View, {
-          style: {
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row'
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 22
-          }
-        }, _react.default.createElement(_reactNative.Image, {
-          style: {
-            width: 30,
-            height: 30,
-            marginEnd: 8
-          },
-          source: {
-            uri: "http://openweathermap.org/img/w/50d.png",
-            cache: "force-cache"
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 23
-          }
-        }), _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 24
-          }
-        }, "26 / 16\xB0C"))), _react.default.createElement(_Divider.default, {
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 27
-          }
-        }), _react.default.createElement(_reactNative.View, {
-          style: {
-            flexDirection: 'row',
-            alignItems: "center"
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 28
-          }
-        }, _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 29
-          }
-        }, "Sat - Clear"), _react.default.createElement(_reactNative.View, {
-          style: {
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-            flex: 1,
-            flexDirection: 'row'
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 30
-          }
-        }, _react.default.createElement(_reactNative.Image, {
-          style: {
-            width: 30,
-            height: 30,
-            marginEnd: 8
-          },
-          source: {
-            uri: "http://openweathermap.org/img/w/50d.png",
-            cache: "force-cache"
-          },
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 31
-          }
-        }), _react.default.createElement(_reactNative.Text, {
-          style: styles.cardText,
-          __source: {
-            fileName: _jsxFileName,
-            lineNumber: 32
-          }
-        }, "26 / 16\xB0C"))), _react.default.createElement(_Divider.default, {
+        }), _react.default.createElement(_Divider.default, {
           divMarginStart: -16,
           divMarginEnd: -16,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 35
+            lineNumber: 68
           }
         }), _react.default.createElement(_reactNative.View, {
           style: {
@@ -86707,13 +86626,13 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
           },
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 36
+            lineNumber: 69
           }
         }, _react.default.createElement(_reactNative.Text, {
           style: styles.cardText,
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 37
+            lineNumber: 70
           }
         }, "5-Day forecast")));
       }
@@ -86724,7 +86643,8 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
   var _default2 = ForecastCard;
   exports.default = _default2;
   ForecastCard.propTypes = {
-    forecastData: _propTypes.default.object
+    latitude: _propTypes.default.number,
+    longitude: _propTypes.default.number
   };
 
   var styles = _reactNative.StyleSheet.create({
@@ -86740,7 +86660,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       justifyContent: 'center'
     }
   });
-},545,[1,544,19,20,35,38,41,53,183,2,70,546],"components/ForecastCard.js");
+},545,[1,544,19,20,35,38,41,53,183,2,70,546,547],"components/ForecastCard.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
 
@@ -86846,6 +86766,133 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     });
   };
 },546,[1,544,19,20,35,38,41,53,183,2,70],"components/Divider.js");
+__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
+  var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
+
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
+  exports.getDirection = getDirection;
+  exports.getTime = getTime;
+  exports.getForecastData = getForecastData;
+  exports.DayMap = exports.ForecastType = void 0;
+
+  var _regenerator = _interopRequireDefault(_$$_REQUIRE(_dependencyMap[1], "@babel/runtime/regenerator"));
+
+  function getDirection(value) {
+    var x = parseInt(value);
+
+    switch (true) {
+      case 0:
+        return "N";
+
+      case x > 0 && x < 45:
+        return "NNE";
+
+      case 45:
+        return "NE";
+
+      case x > 45 && x < 90:
+        return "ENE";
+
+      case 90:
+        return "E";
+
+      case x > 90 && x < 135:
+        return "ESE";
+
+      case 135:
+        return "SE";
+
+      case x > 135 && x < 180:
+        return "SSE";
+
+      case 180:
+        return "S";
+
+      case x > 180 && x < 225:
+        return "SSW";
+
+      case 225:
+        return "SW";
+
+      case x > 225 && x < 270:
+        return "WSW";
+
+      case 270:
+        return "W";
+
+      case x > 270 && x < 315:
+        return "WNW";
+
+      case 315:
+        return "NW";
+
+      case x > 315 && x < 360:
+        return "NNW";
+
+      case 360:
+        return "N";
+    }
+  }
+
+  function getTime(value) {
+    var d = new Date(value * 1000);
+    console.log(d);
+    console.log("Hours: " + d.getHours());
+    console.log("Minutes: " + d.getMinutes());
+    console.log("Seconds: " + d.getSeconds());
+  }
+
+  function getForecastData(type, latitude, longitude, city) {
+    var requestUrl, apiKey;
+    return _regenerator.default.async(function getForecastData$(_context) {
+      while (1) {
+        switch (_context.prev = _context.next) {
+          case 0:
+            requestUrl = null;
+            apiKey = "086ca0166ede3e1c8dd20679d42bc3e9";
+
+            if (city != undefined) {
+              requestUrl = "https://api.openweathermap.org/data/2.5/" + type + "?q=" + city + "&units=metric&appid=" + apiKey;
+            } else {
+              requestUrl = "https://api.openweathermap.org/data/2.5/" + type + "?lat=" + latitude + "&lon=" + longitude + "&units=metric&appid=" + apiKey;
+            }
+
+            return _context.abrupt("return", fetch(requestUrl).then(function (response) {
+              return response.json();
+            }).then(function (responseJson) {
+              console.log("RequestUrl: \n" + requestUrl);
+              return responseJson;
+            }).catch(function (error) {
+              console.error(error);
+            }));
+
+          case 4:
+          case "end":
+            return _context.stop();
+        }
+      }
+    }, null, this);
+  }
+
+  var ForecastType = Object.freeze({
+    "current": "weather",
+    "forecast5": "forecast",
+    "forecast16": "forecast/daily"
+  });
+  exports.ForecastType = ForecastType;
+  var DayMap = Object.freeze({
+    0: "Sun",
+    1: "Mon",
+    2: "Tue",
+    3: "Wed",
+    4: "Thu",
+    5: "Fri",
+    6: "Sat"
+  });
+  exports.DayMap = DayMap;
+},547,[1,103],"utility/Util.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   var _interopRequireDefault = _$$_REQUIRE(_dependencyMap[0], "@babel/runtime/helpers/interopRequireDefault");
 
@@ -87153,7 +87200,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
       padding: 8
     }
   });
-},547,[1,544,19,20,35,38,41,53,183,2,70,546,554,548,549,550,551],"components/DetailsCard.js");
+},548,[1,544,19,20,35,38,41,53,183,2,70,546,547,549,550,551,552],"components/DetailsCard.js");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   module.exports = _$$_REQUIRE(_dependencyMap[0], "react-native/Libraries/Image/AssetRegistry").registerAsset({
     "__packager_asset": true,
@@ -87165,7 +87212,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     "name": "wind",
     "type": "png"
   });
-},548,[178],"icons/wind.png");
+},549,[178],"icons/wind.png");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   module.exports = _$$_REQUIRE(_dependencyMap[0], "react-native/Libraries/Image/AssetRegistry").registerAsset({
     "__packager_asset": true,
@@ -87177,7 +87224,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     "name": "temp",
     "type": "png"
   });
-},549,[178],"icons/temp.png");
+},550,[178],"icons/temp.png");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   module.exports = _$$_REQUIRE(_dependencyMap[0], "react-native/Libraries/Image/AssetRegistry").registerAsset({
     "__packager_asset": true,
@@ -87189,7 +87236,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     "name": "humidity",
     "type": "png"
   });
-},550,[178],"icons/humidity.png");
+},551,[178],"icons/humidity.png");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   module.exports = _$$_REQUIRE(_dependencyMap[0], "react-native/Libraries/Image/AssetRegistry").registerAsset({
     "__packager_asset": true,
@@ -87201,7 +87248,7 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     "name": "pressure",
     "type": "png"
   });
-},551,[178],"icons/pressure.png");
+},552,[178],"icons/pressure.png");
 __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
   module.exports = _$$_REQUIRE(_dependencyMap[0], "react-native/Libraries/Image/AssetRegistry").registerAsset({
     "__packager_asset": true,
@@ -87213,79 +87260,13 @@ __d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, e
     "name": "chevron",
     "type": "png"
   });
-},552,[178],"icons/chevron.png");
+},553,[178],"icons/chevron.png");
 __d(function(global, require, _aUnused, _bUnused, module, exports, _cUnused) {
   module.exports = {
   "name": "weatherProject",
   "displayName": "weatherProject"
 };
-},553,[],"app.json");
-__d(function (global, _$$_REQUIRE, _$$_IMPORT_DEFAULT, _$$_IMPORT_ALL, module, exports, _dependencyMap) {
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-  exports.getDirection = getDirection;
-  exports.getTime = getTime;
-
-  function getDirection(value) {
-    var x = parseInt(value);
-
-    switch (true) {
-      case 0:
-        return "N";
-
-      case x > 0 && x < 45:
-        return "NNE";
-
-      case 45:
-        return "NE";
-
-      case x > 45 && x < 90:
-        return "ENE";
-
-      case 90:
-        return "E";
-
-      case x > 90 && x < 135:
-        return "ESE";
-
-      case 135:
-        return "SE";
-
-      case x > 135 && x < 180:
-        return "SSE";
-
-      case 180:
-        return "S";
-
-      case x > 180 && x < 225:
-        return "SSW";
-
-      case 225:
-        return "SW";
-
-      case x > 225 && x < 270:
-        return "WSW";
-
-      case 270:
-        return "W";
-
-      case x > 270 && x < 315:
-        return "WNW";
-
-      case 315:
-        return "NW";
-
-      case x > 315 && x < 360:
-        return "NNW";
-
-      case 360:
-        return "N";
-    }
-  }
-
-  function getTime(value) {}
-},554,[],"utility/Util.js");
+},554,[],"app.json");
 __r(90);
 __r(0);
 //# sourceMappingURL=index.map

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Image} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image} from 'react-native';
 import PropTypes from 'prop-types';
 import Divider from './Divider';
 import { getDirection } from '../utility/Util';

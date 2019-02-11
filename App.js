@@ -10,6 +10,7 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Image} from 'react-native';
 import ForecastCard from './components/ForecastCard'
 import DetailsCard from './components/DetailsCard'
+import {getForecastData, ForecastType} from './utility/Util'
 
 export async function requestRuntimePermission() {
   try {
@@ -39,7 +40,7 @@ export default class App extends Component{
     super(props);
     this.state = { latitude: 0, longitude: 0, error: null }
     this.state = { weatherData: null }
-    this.state = { temp: 0, tempMax: 0, tempMin: 0, pressure: 0, humidity: 0, description: null, icon: null, visibility: 0, windSpeed: 0, windDegree: 0, sunrise: null, sunset: null, city: null}
+    this.state = { temp: 0, description: null, city: null}
   }
 
   async componentDidMount() {
@@ -50,8 +51,9 @@ export default class App extends Component{
     this.getLongLat = navigator.geolocation.watchPosition(
       (position) => {
         if ((this.state.latitude !== position.coords.latitude) && (this.state.longitude !== position.coords.longitude)) {
-          this.getWeatherFromApiAsync(position);
-
+          getForecastData(ForecastType.current, position.coords.latitude, position.coords.longitude)
+          .then(data => this.setStateData(data))
+          
           this.setState({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -68,51 +70,15 @@ export default class App extends Component{
     navigator.geolocation.clearWatch(this.getLongLat);
   }
 
-  async getWeatherFromApiAsync(position) {
-
-    var apiKey = "52a3a122fb5328e9cbbed672e53f4be5";
-    var latitude = position.coords.latitude;
-    var longitude = position.coords.longitude;
-    var city = "Delhi";
-    var reqUrlLatLon = "https://api.openweathermap.org/data/2.5/weather?lat="+latitude+"&lon="+longitude+"&units=metric&APPID="+apiKey;
-    var reqUrlCity = "https://api.openweathermap.org/data/2.5/weather?q="+city+"&units=metric&appid="+apiKey;
-
-    return fetch(reqUrlLatLon)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(reqUrlLatLon);
-        this.setStateData(responseJson);
-        return responseJson;
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }
-
-  setModalVisible(visible) {
-    this.setState({ modalVisible: visible })
-  }
-
   setStateData(data) {
 
-    var d = new Date(data.sys.sunrise*1000);
-    console.log("Hours: "+d.getHours());
-    console.log("Minutes: "+d.getMinutes());
-    console.log("Seconds: "+d.getSeconds());
-        
+    if (data == undefined) {
+      return;
+    }
+
     this.setState({
       temp: parseInt(data.main.temp),
-      // tempMax: data.main.temp_max,
-      // tempMin: data.main.temp_min,
-      // pressure: data.main.pressure,
-      // humidity: data.main.humidity,
       description: data.weather[0].description.charAt(0).toUpperCase()+data.weather[0].description.slice(1),
-      // icon: data.weather[0].icon,
-      // visibility: data.visibility,
-      // windSpeed: data.wind.speed,
-      // windDegree: data.wind.deg,
-      // sunrise: data.sys.sunrise,
-      // sunset: data.sys.sunset,
       city: data.name,
 
       weatherData: data
@@ -138,7 +104,7 @@ export default class App extends Component{
           <Image style={{width: 16, height: 16}} source={require('./icons/chevron.png')} />
         </View>
 
-        <ForecastCard forecastData={this.state.weatherForecastData}/>
+        <ForecastCard latitude={this.state.latitude} longitude={this.state.longitude}/>
         <DetailsCard detailsData={this.state.weatherData}/>
 
       </SafeAreaView>
