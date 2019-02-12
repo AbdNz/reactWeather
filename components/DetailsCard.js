@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, Image} from 'react-native';
 import PropTypes from 'prop-types';
 import Divider from './Divider';
+import AnimatedView from './AnimatedView';
 import { getDirection } from '../utility/Util';
 
 export default class DetailsCard extends Component {
@@ -10,8 +11,8 @@ export default class DetailsCard extends Component {
         var data = this.props.detailsData;
 
         return(
-            data != undefined ? 
-            <View style={styles.cardContainer}>
+            data == undefined ? null :
+            <AnimatedView style={styles.cardContainer}>
                 <View style={{flexDirection:'row', margin: 12}}>
                     <Text style={[styles.cardText, {fontWeight: 'bold'}]}>Details</Text>
                 </View>
@@ -19,8 +20,8 @@ export default class DetailsCard extends Component {
                 <View style={{flexDirection: 'row', }}>
                     <View style={[styles.detailsContainer, {borderEndWidth: 1}]}>
                         <View>
-                            <Text>{getDirection(data.wind.deg)}</Text>
-                            <Text style={{fontSize: 18}}>{data.wind.speed}km/h</Text>
+                            <Text style={styles.detailsRowHeader}>{getDirection(data.wind.deg)}</Text>
+                            <Text style={styles.detailsRowContent}>{data.wind.speed}km/h</Text>
                         </View>
                         <View style={styles.imageContainer}>
                             <Image style={styles.detailsImage} source={require('../icons/wind.png')} />
@@ -29,8 +30,8 @@ export default class DetailsCard extends Component {
 
                     <View style={styles.detailsContainer}>
                         <View>
-                            <Text>Real feel</Text>
-                            <Text style={{fontSize: 18}}>{data.main.temp}°C</Text>
+                            <Text style={styles.detailsRowHeader}>Real feel</Text>
+                            <Text style={styles.detailsRowContent}>{data.main.temp}°C</Text>
                         </View>
                         <View style={styles.imageContainer}>
                             <Image style={styles.detailsImage} source={require('../icons/temp.png')} />
@@ -41,8 +42,8 @@ export default class DetailsCard extends Component {
                 <View style={{flexDirection: 'row'}}>
                     <View style={[styles.detailsContainer,{borderEndWidth: 1}]}>
                         <View>
-                            <Text>Humidity</Text>
-                            <Text style={{fontSize: 18}}>{data.main.humidity}%</Text>
+                            <Text style={styles.detailsRowHeader}>Humidity</Text>
+                            <Text style={styles.detailsRowContent}>{data.main.humidity}%</Text>
                         </View>
                         <View style={styles.imageContainer}>
                             <Image style={styles.detailsImage} source={require('../icons/humidity.png')} />
@@ -51,15 +52,15 @@ export default class DetailsCard extends Component {
 
                     <View style={styles.detailsContainer}>
                         <View>
-                            <Text>Pressure</Text>
-                            <Text style={{fontSize: 18}}>{data.main.pressure}hPa</Text>
+                            <Text style={styles.detailsRowHeader}>Pressure</Text>
+                            <Text style={styles.detailsRowContent}>{data.main.pressure}hPa</Text>
                         </View>
                         <View style={styles.imageContainer}>
                             <Image style={styles.detailsImage} source={require('../icons/pressure.png')} />
                         </View>
                     </View>
                 </View>
-            </View> : null
+            </AnimatedView>
         )
     }
 }
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(52, 52, 52, 0.2)',
     },
     cardText: {
+        color: 'black',
         fontSize: 20, 
         alignItems: 'center',
         justifyContent: 'center'
@@ -94,5 +96,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
         padding: 8
+    },
+    detailsRowHeader: {
+        color: 'black',
+        fontWeight: 'bold'
+    },
+    detailsRowContent : {
+        color: 'black',
+        fontSize: 18
     }
 }) 

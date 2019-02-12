@@ -1,17 +1,24 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, Image} from 'react-native';
+import {Platform, StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
 import PropTypes from 'prop-types';
 import Divider from './Divider';
-import {getForecastData, ForecastType, getTime} from '../utility/Util'
+import AnimatedView from './AnimatedView';
+import {getForecastData, ForecastType, getDescription} from '../utility/Util'
 
 export default class ForecastCard extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {data: null, isDataAvailable: false}
+        this.state = {data: null, isDataAvailable: false, isCardExpanded: false}
+    }
+
+    expandCard = (isExpanded) => {
+        this.setState({isCardExpanded: !this.state.isCardExpanded})
     }
 
     render() {
+
+        let { fadeAnim } = this.state;
 
         const latitude = this.props.latitude;
         const longitude = this.props.longitude;
@@ -25,15 +32,20 @@ export default class ForecastCard extends Component {
               });
         }
 
-        function setData(data) {
+        function setData(data, isExpanded) {
             console.log(data);
-            var count = data.cnt
+            var count = isExpanded ? data.cnt : 3
             var listItem = [];
 
             for (i=0; i<count; i++) {
-                listItem.push(<ForecastRow />)
+                dt = data.list[i].dt
+                max = Math.round(data.list[i].temp.max)
+                min = Math.round(data.list[i].temp.min)
+                icon = data.list[i].weather[0].icon
+                description = getDescription(dt, data.list[i].weather[0].description)
+                listItem.push(<ForecastRow key={dt} max={max} min={min} icon={icon} description={description}/>)
                 if(i!=count-1) {
-                    listItem.push(<Divider />)
+                    listItem.push(<Divider key={dt+1}/>)
                 }
             }
             return listItem;
@@ -41,36 +53,35 @@ export default class ForecastCard extends Component {
 
         var Details = () => {
             return(
-                this.state.data != null ? setData(this.state.data):null
+                this.state.data != null ? setData(this.state.data, this.state.isCardExpanded):null
             )
         }
 
         const ForecastRow = (props) => {
             return(
                 <View style={{flexDirection:'row', alignItems: "center"}}>
-                    <Text style={styles.cardText}>{props.day}</Text>
-                    <View style={{justifyContent:'flex-end', alignItems: 'center', flex:1, flexDirection:'row'}}>
-                        <Image style={{width: 30, height: 30, marginEnd: 8}} source={{uri: "http://openweathermap.org/img/w/50d.png", cache: "force-cache"}} />
-                        <Text style={styles.cardText}>26 / 16°C</Text>
+                    <View>
+                        <Text style={styles.cardText}>{props.description}</Text>
+                    </View>
+                    <View style={styles.rowContainer}>
+                        <Image style={{width: 30, height: 30}} source={{uri: "http://openweathermap.org/img/w/"+props.icon+".png", cache: "force-cache"}} />
+                        <Text style={[styles.cardText, { textAlign: 'right'}]}>{props.max} / {props.min}°C</Text>
                     </View>
                 </View>
             )
         }
 
         return(
-            <View style={styles.cardContainer}>
-                {/* <ForecastRow day={"Today · "}/>
-                <Divider />
-                <ForecastRow day={"Tomorrow · "}/>
-                <Divider />
-                <ForecastRow day={"Wed · "}/> */}
+            this.state.data == null ? null : 
+            <AnimatedView style={styles.cardContainer}>
                 <Details />
                 <Divider divMarginStart={-16} divMarginEnd={-16} />
-                <View style={{flexDirection:'row', justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={styles.cardText}>5-Day forecast</Text>
-                </View>
-                
-            </View>
+                <TouchableOpacity onPress={event => this.expandCard()}>
+                    <View style={styles.forecastButtonContainer}>
+                        <Text style={[styles.cardText, {fontWeight: 'bold'}]}>7-Day forecast</Text>
+                    </View>
+                </TouchableOpacity>
+            </AnimatedView>
         )
     }
 }
@@ -89,9 +100,21 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(52, 52, 52, 0.2)',
     },
     cardText: {
-        fontSize: 20, 
+        color: 'black',
+        fontSize: 16, 
         alignItems: 'center',
         justifyContent: 'center',
         
+    }, 
+    rowContainer: {
+        justifyContent:'flex-end',
+        alignItems: 'center',
+        flex:1,
+        flexDirection:'row'
+    },
+    forecastButtonContainer: {
+        flexDirection:'row',
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 }) 
