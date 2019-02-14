@@ -12,28 +12,15 @@ export default class ForecastCard extends Component {
         this.state = {data: null, isDataAvailable: false, isCardExpanded: false}
     }
 
-    expandCard = (isExpanded) => {
+    expandCard = () => {
         this.setState({isCardExpanded: !this.state.isCardExpanded})
     }
 
     render() {
 
-        let { fadeAnim } = this.state;
-
-        const latitude = this.props.latitude;
-        const longitude = this.props.longitude;
-
-        if (latitude != undefined && longitude != undefined && !this.state.isDataAvailable) {
-            getForecastData(ForecastType.forecast16, latitude, longitude)
-              .then(data => this.setState({data: data, isDataAvailable: true}))
-              .catch((error) => {
-                  this.setState({isDataAvailable: true})
-                  console.error(error);
-              });
-        }
+        var data = this.props.forecastData
 
         function setData(data, isExpanded) {
-            console.log(data);
             var count = isExpanded ? data.cnt : 3
             var listItem = [];
 
@@ -53,7 +40,7 @@ export default class ForecastCard extends Component {
 
         var Details = () => {
             return(
-                this.state.data != null ? setData(this.state.data, this.state.isCardExpanded):null
+                data != null ? setData(data, this.state.isCardExpanded):null
             )
         }
 
@@ -72,7 +59,6 @@ export default class ForecastCard extends Component {
         }
 
         return(
-            this.state.data == null ? null : 
             <AnimatedView style={styles.cardContainer}>
                 <Details />
                 <Divider divMarginStart={-16} divMarginEnd={-16} />
@@ -87,8 +73,7 @@ export default class ForecastCard extends Component {
 }
 
 ForecastCard.propTypes = {
-    latitude: PropTypes.number,
-    longitude: PropTypes.number
+    forecastData: PropTypes.object
 }
 
 

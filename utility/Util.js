@@ -18,8 +18,7 @@ export async function getForecastData(type, latitude, longitude, city) {
     return fetch(requestUrl)
       .then((response) => response.json())
       .then((responseJson) => {
-          console.log("RequestUrl: \n"+requestUrl);
-          
+          console.log("RequestUrl: "+requestUrl);
         return responseJson;
       })
       .catch((error) => {

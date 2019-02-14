@@ -11,7 +11,7 @@ export default class AnimatedView extends React.Component {
       this.state.fadeAnim,            // The animated value to drive
       {
         toValue: 1,                   // Animate to opacity: 1 (opaque)
-        duration: 2000,              // Make it take a while
+        duration: 1000,              // Make it take a while
       }
     ).start();                        // Starts the animation
   }

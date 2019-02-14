@@ -7,7 +7,7 @@
  */
 
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, Alert, Image, ScrollView, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {Platform, StyleSheet, Text, View, SafeAreaView, PermissionsAndroid, AsyncStorage, Image, ScrollView, TouchableOpacity, ActivityIndicator} from 'react-native';
 import ForecastCard from './components/ForecastCard'
 import DetailsCard from './components/DetailsCard'
 import {getForecastData, ForecastType} from './utility/Util'
@@ -16,15 +16,20 @@ import AnimatedView from './components/AnimatedView'
 export async function requestRuntimePermission() {
   try {
     const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
         title: "Location Permission",
-        message: "App want to access your location"
+        message: "App want to access your location",
+        buttonNeutral: "Ask me later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
       }
     )
 
-    if (granted != PermissionsAndroid.RESULTS.GRANTED) {
-      Alert.alert("Location permission denied");
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Location permission granted");
+    } else {
+      console.log("Location permission denied");
     }
   } catch(err) {
     console.warn(err);
@@ -32,51 +37,81 @@ export async function requestRuntimePermission() {
 }
 
 
-
 export default class App extends Component{
 
   constructor(props) {
     super(props);
     this.state = { latitude: 0, longitude: 0, error: null }
-    this.state = { weatherData: null, isActivityIndicatorVisible: true }
+    this.state = { currentData: null, forecastData5: null, forecastData16: null }
     this.state = { temp: 0, description: null, city: null}
   }
 
   async componentDidMount() {
+
+    var currentData = await AsyncStorage.getItem(ForecastType.current)
+    this.setStateData(JSON.parse(currentData), ForecastType.current, false)
+    var forecastData16 = await AsyncStorage.getItem(ForecastType.forecast16)
+    this.setStateData(JSON.parse(forecastData16), ForecastType.forecast16, false)
+    var forecastData5 = await AsyncStorage.getItem(ForecastType.forecast5)
+    this.setStateData(JSON.parse(forecastData5), ForecastType.forecast5, false)
+
+
     if (Platform.OS === 'android') {
       await requestRuntimePermission();
     }
 
     this.getLongLat = navigator.geolocation.watchPosition( (position) => {
-      console.log(position.coords);
-        if ((this.state.latitude !== position.coords.latitude) && (this.state.longitude !== position.coords.longitude)) {
+      let lat = position.coords.latitude;
+      let lon = position.coords.longitude;
+
+        if ((this.state.latitude !== lat) && (this.state.longitude !== lon)) {
           this.setState({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
+            latitude: lat,
+            longitude: lon,
             error: null
           })
 
-          getForecastData(ForecastType.current, position.coords.latitude, position.coords.longitude)
-          .then(data => this.setStateData(data))
+          getForecastData(ForecastType.current, lat, lon)
+            .then(data => this.setStateData(data, ForecastType.current, true))
+
+          getForecastData(ForecastType.forecast16, lat, lon)
+            .then(data => this.setStateData(data, ForecastType.forecast16, true))
         }
       },
       (error) => this.setState({error: error.message}),
-      {enableHighAccuracy: true, timeout: 2000, maximumAge: 100, distanceFilter: 10}
+      {enableHighAccuracy: false, timeout: 10000, maximumAge: 5000, distanceFilter: 10}
     );
+
   }
 
   componentWillUnmount() {
     navigator.geolocation.clearWatch(this.getLongLat);
   }
 
-  setStateData(data) {
-    this.setState({
-      temp: parseInt(data.main.temp),
-      description: data.weather[0].description.charAt(0).toUpperCase()+data.weather[0].description.slice(1),
-      city: data.name,
-      weatherData: data,
-      isActivityIndicatorVisible: false
-    })
+  setStateData(data, forecastType, isFromApi) {
+
+    if(data != null) {
+      if(isFromApi) {
+        AsyncStorage.setItem(forecastType, JSON.stringify(data))
+      }
+    } else {
+      return
+    }
+
+    if (forecastType == ForecastType.current) {
+      this.setState({
+        temp: parseInt(data.main.temp),
+        description: data.weather[0].description.charAt(0).toUpperCase()+data.weather[0].description.slice(1),
+        city: data.name,
+        currentData: data,
+        isActivityIndicatorVisible: false
+      })
+    } else if (forecastType == ForecastType.forecast5) {
+      this.setState({ forecastData5: data })
+    } else if (forecastType == ForecastType.forecast16) {
+      this.setState({ forecastData16: data })
+    }
+    
   }
 
   onPressMoreButton() {
@@ -89,7 +124,7 @@ export default class App extends Component{
       <SafeAreaView style={{flex: 1, backgroundColor: 'lightblue'}}>
         <AnimatedView>
         <Text style={styles.cityName}>{this.state.city}</Text>
-        <ScrollView>
+        <ScrollView style={{marginBottom: 32}}>
           <View style={styles.container}>
             <View style={{flexDirection: 'row'}}>
               <Text style={styles.tempMain}>{this.state.temp}</Text>
@@ -103,8 +138,8 @@ export default class App extends Component{
               </View>
             </TouchableOpacity>
           </View>
-          <ForecastCard latitude={this.state.latitude} longitude={this.state.longitude}/>
-          <DetailsCard detailsData={this.state.weatherData}/>
+          <ForecastCard forecastData={this.state.forecastData16}/>
+          <DetailsCard detailsData={this.state.currentData}/>
         </ScrollView>
         </AnimatedView>
       </SafeAreaView>
