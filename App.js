@@ -12,6 +12,7 @@ import ForecastCard from './components/ForecastCard'
 import DetailsCard from './components/DetailsCard'
 import {getForecastData, ForecastType} from './utility/Util'
 import AnimatedView from './components/AnimatedView'
+import firebase, { Notification, NotificationOpen } from 'react-native-firebase';
 
 export async function requestRuntimePermission() {
   try {
@@ -44,6 +45,34 @@ export default class App extends Component{
     this.state = { latitude: 0, longitude: 0, error: null }
     this.state = { currentData: null, forecastData5: null, forecastData16: null }
     this.state = { temp: 0, description: null, city: null}
+
+    firebase.messaging().getToken()
+      .then(fcmToken => {
+        if (fcmToken) {
+          console.log("FCM Token: \n"+fcmToken);
+        } else {
+          console.log("FCM Token not available");
+        } 
+      });
+
+    firebase.messaging().hasPermission()
+      .then(enabled => {
+        if (enabled) {
+          console.log("User have messenging permissions");
+        } else {
+          console.log("User don't have messenging permission");
+        } 
+      });
+
+    firebase.messaging().requestPermission()
+      .then(() => {
+        console.log("User has authorised");
+      })
+      .catch(error => {
+        console.log("User has rejected permissions ");
+      });
+
+
   }
 
   async componentDidMount() {
@@ -55,6 +84,43 @@ export default class App extends Component{
     var forecastData5 = await AsyncStorage.getItem(ForecastType.forecast5)
     this.setStateData(JSON.parse(forecastData5), ForecastType.forecast5, false)
 
+
+    this.notificationDisplayedListener = firebase.notifications().onNotificationDisplayed((notification) => {
+      // Process your notification as required
+      // ANDROID: Remote notifications do not contain the channel ID. You will have to specify this manually if you'd like to re-display the notification.
+      console.log("Notification Displayed");
+      
+    });
+    this.notificationListener = firebase.notifications().onNotification((notification) => {
+        // Process your notification as required
+        console.log("Notification Received");
+        console.log(notification.title+"\n"+notification.body+"\n"+notification.notificationId);
+    });
+
+    this.notificationOpenedListener = firebase.notifications().onNotificationOpened((notificationOpen) => {
+        // Get the action triggered by the notification being opened
+        const action = notificationOpen.action;
+        // Get information about the notification that was opened
+        const notification = notificationOpen.notification;
+    });
+
+    firebase.notifications().getInitialNotification()
+      .then((notificationOpen) => {
+        if (notificationOpen) {
+          // App was opened by a notification
+          // Get the action triggered by the notification being opened
+          const action = notificationOpen.action;
+          // Get information about the notification that was opened
+          const notification = notificationOpen.notification;  
+        }
+      });
+
+    this.messageListener = firebase.messaging().onMessage((message) => {
+        // Process your message as required
+        console.log("Message Received");
+        console.log(message);
+        
+      });
 
     if (Platform.OS === 'android') {
       await requestRuntimePermission();
@@ -82,10 +148,19 @@ export default class App extends Component{
       {enableHighAccuracy: false, timeout: 10000, maximumAge: 5000, distanceFilter: 10}
     );
 
+    this.onTokenRefreshListener = firebase.messaging().onTokenRefresh(fcmToken => {
+        console.log("FCM Token refreshed");
+    });
+
   }
 
   componentWillUnmount() {
     navigator.geolocation.clearWatch(this.getLongLat);
+    this.onTokenRefreshListener();
+    this.notificationDisplayedListener();
+    this.notificationListener();
+    this.notificationOpenedListener();
+    this.messageListener();
   }
 
   setStateData(data, forecastType, isFromApi) {
