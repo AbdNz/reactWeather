@@ -7,6 +7,7 @@ target 'weatherProject' do
 
   	# Pods for weatherProject
 	pod 'Firebase/Core'
-	pod 'Firebase/Messaging'
+	pod 'Firebase/Messaging’
+  pod 'react-native-onesignal', :path => '../node_modules/react-native-onesignal'
 
 end
