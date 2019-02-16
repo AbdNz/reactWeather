@@ -10,4 +10,6 @@ target 'weatherProject' do
 	pod 'Firebase/Messaging’
   pod 'react-native-onesignal', :path => '../node_modules/react-native-onesignal'
 
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
+
 end
