@@ -1,9 +1,33 @@
 import React, {Component} from 'react';
-import {Platform, StyleSheet, Text, View, SafeAreaView, AsyncStorage, Image, ScrollView, TouchableOpacity} from 'react-native';
+import {Platform, StyleSheet, Text, View, SafeAreaView, AsyncStorage, Image, ScrollView, TouchableOpacity, PermissionsAndroid } from 'react-native';
+import { getForecastData, ForecastType, } from '../utility/Util'
+import OneSignal from 'react-native-onesignal'
 import ForecastCard from './ForecastCard'
 import DetailsCard from './DetailsCard'
-import {getForecastData, ForecastType} from '../utility/Util'
 import AnimatedView from './AnimatedView'
+
+export async function requestRuntimePermission() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+        title: "Location Permission",
+        message: "App want to access your location",
+        buttonNeutral: "Ask me later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
+    )
+
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Location permission granted");
+    } else {
+      console.log("Location permission denied");
+    }
+  } catch(err) {
+    console.warn(err);
+  }
+}
 
 export default class MainScreen extends Component{
 
@@ -14,9 +38,19 @@ export default class MainScreen extends Component{
       this.state = { currentData: null, forecastData5: null, forecastData16: null }
       this.state = { temp: 0, description: null, city: null}
   
+      OneSignal.init("b15d255f-df2e-49e0-824b-ceeb8bd8666b");
+      OneSignal.enableVibrate(true);
+      OneSignal.inFocusDisplaying(1);
+      OneSignal.addEventListener('received', this.onReceived);
+      OneSignal.addEventListener('opened', this.onOpened);
+      OneSignal.addEventListener('ids', this.onIds);
     }
   
     async componentDidMount() {
+
+      if (Platform.OS == 'android') {
+        await requestRuntimePermission()
+      }
   
       var currentData = await AsyncStorage.getItem(ForecastType.current)
       this.setStateData(JSON.parse(currentData), ForecastType.current, false)
@@ -51,6 +85,24 @@ export default class MainScreen extends Component{
   
     componentWillUnmount() {
       navigator.geolocation.clearWatch(this.getLongLat);
+      OneSignal.removeEventListener('received', this.onReceived);
+      OneSignal.removeEventListener('opened', this.onOpened);
+      OneSignal.removeEventListener('ids', this.onIds);
+    }
+
+    onReceived(notification) {
+      console.log("Notification received: ", notification);
+    }
+
+    onOpened(openResult) {
+      console.log('Message: ', openResult.notification.payload.body);
+      console.log('Data: ', openResult.notification.payload.additionalData);
+      console.log('isActive: ', openResult.notification.isAppInFocus);
+      console.log('openResult: ', openResult);
+    }
+
+    onIds(device) {
+      console.log('Device info: ', device);
     }
   
     setStateData(data, forecastType, isFromApi) {

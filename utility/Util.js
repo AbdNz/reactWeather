@@ -1,3 +1,5 @@
+
+
 export function getDirection(value) {
     var val = Math.floor((value / 22.5) + 0.5);
     var arr = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
